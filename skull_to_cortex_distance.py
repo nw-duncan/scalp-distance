@@ -294,7 +294,7 @@ def scalp_distance(subject,trans_file=None,coords=None):
     Assumes data conforms to BIDs format. Output to ./derivatives/scalp_distance
     folder.
 
-    Inputs
+    Parameters
     ------------
 
     subject:        Subject ID
