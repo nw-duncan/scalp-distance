@@ -1,0 +1,8 @@
+joblib
+matplotlib
+nibabel
+nipype
+numpy
+os
+scipy
+scikit-image
