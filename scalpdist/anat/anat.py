@@ -49,31 +49,3 @@ def run_mni_alignment(in_file,out_dir):
     invt.inputs.invert_xfm = True
     invt.inputs.out_file = os.path.join(out_dir,'mni_to_anat.mat')
     invt.run()
-
-def convert_coords(coords,trans_file,dest_file,t1_aff):
-    # Send coordinates to a text file
-    txt_file = os.path.join(out_dir,'input_mni_coordinates_mm.txt')
-    np.savetxt(txt_file,coords)
-    # Convert coordinates to T1 space
-    out_file = os.path.join(out_dir,'input_anat_coordinates_mm.txt')
-    warp = fsl.WarpPoints()
-    warp.inputs.in_coords = txt_file
-    warp.inputs.src_file = os.path.join(os.environ['FSLDIR'],'data','standard',
-            'MNI152_T1_2mm.nii.gz')
-    warp.inputs.dest_file = dest_file
-    warp.inputs.xfm_file = trans_file
-    warp.inputs.coord_mm = True
-    warp.inputs.out_file = out_file
-    warp.run()
-    # Convert from mm to voxel coordinates
-    mm = np.loadtxt(out_file)
-    if mm.ndim > 1:
-        vox = []
-        for temp in mm:
-            vox.append(np.dot(np.linalg.inv(t1_aff),np.hstack((temp,1))))
-        vox = np.round(np.array(vox),0)[:,:3].astype(int)
-    else:
-        vox = np.dot(np.linalg.inv(t1_aff),np.hstack((mm,1)))
-        vox = np.round(np.array(vox),0)[:3].astype(int)
-    np.savetxt(os.path.join(out_dir,'input_anat_coordinates_vox.txt'),vox)
-    return(vox)
