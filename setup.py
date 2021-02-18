@@ -47,5 +47,4 @@ setup(
     platforms = 'any',
     keywords = ['neuroscience', 'TMS', 'MRI'],
     install_requires = install_requires,
-    }
 )
