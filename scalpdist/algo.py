@@ -121,7 +121,7 @@ def calc_distances(brain_edge,head_edge):
         dist_img[brain_coords[i,0],brain_coords[i,1],brain_coords[i,2]] = temp[i]
     return(dist_img)
 
-def convert_coords(coords,trans_file,dest_file,t1_aff):
+def convert_coords(coords,trans_file,dest_file,t1_aff,out_dir):
     # Send coordinates to a text file
     txt_file = os.path.join(out_dir,'input_mni_coordinates_mm.txt')
     np.savetxt(txt_file,coords)

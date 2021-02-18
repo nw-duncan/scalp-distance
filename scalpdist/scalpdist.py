@@ -100,7 +100,7 @@ def scalp_distance(subject,trans_file=None,coords=None):
         else:
             anat.run_mni_alignment(in_file,out_dir)
             trans_file = os.path.join(out_dir,'mni_to_anat.mat')
-            anat_coords = algo.convert_coords(coords,trans_file,in_file,t1_aff)
+            anat_coords = algo.convert_coords(coords,trans_file,in_file,t1_aff,out_dir)
         # Identify the nearest voxels in the distance image
         # Get distance from sphere around these voxels
         radius = np.round(10/t1_dims.min(),0)
