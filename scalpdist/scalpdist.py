@@ -8,7 +8,7 @@ Niall Duncan, 2021
 import os
 import numpy as np
 from scipy import ndimage
-from scalpdist.anat import load_nifti,resample_img,save_nifti,run_mni_alignment
+from scalpdist import anat,plotting,algo
 
 def scalp_distance(subject,trans_file=None,coords=None):
     """
@@ -49,7 +49,7 @@ def scalp_distance(subject,trans_file=None,coords=None):
         print('Anatomical image not found')
         print('Exiting')
         #return
-    t1_img,t1_aff,t1_dims = load_nifti(in_file)
+    t1_img,t1_aff,t1_dims = anat.load_nifti(in_file)
     isotropic = True
 
     # If images are anisotropic resample to largest dimension size
@@ -58,18 +58,18 @@ def scalp_distance(subject,trans_file=None,coords=None):
         isotropic = False
         t1_img_orig = t1_img.copy()
         t1_dims_orig = t1_dims.copy()
-        t1_img,t1_dims,resample_aff = resample_img(t1_img,t1_dims)
+        t1_img,t1_dims,resample_aff = anat.resample_img(t1_img,t1_dims)
 
     # Calculate head mask + edge
-    head_mask = create_head_mask(t1_img)
-    head_edge = create_mask_edge(head_mask,t1_dims)
+    head_mask = algo.create_head_mask(t1_img)
+    head_edge = algo.create_mask_edge(head_mask,t1_dims)
 
     # Extract brain tissue and detect edge
-    brain_mask = create_brain_mask(t1_img,head_mask,t1_dims)
-    brain_edge = create_mask_edge(brain_mask,t1_dims)
+    brain_mask = algo.create_brain_mask(t1_img,head_mask,t1_dims)
+    brain_edge = algo.create_mask_edge(brain_mask,t1_dims)
 
     # Calculate distance between brain and scalp - convert from voxels to mm
-    brain_dist = calc_distances(brain_edge,head_edge)
+    brain_dist = algo.calc_distances(brain_edge,head_edge)
     brain_dist *= t1_dims[0]
 
     # If necessary, return resampled image to original space
@@ -86,9 +86,9 @@ def scalp_distance(subject,trans_file=None,coords=None):
 
     # Save brain images
     print('\nGenerating NIFTI images')
-    save_nifti(head_edge,t1_aff,os.path.join(out_dir,'head_edge.nii.gz'))
-    save_nifti(brain_edge,t1_aff,os.path.join(out_dir,'brain_edge.nii.gz'))
-    save_nifti(brain_dist,t1_aff,os.path.join(out_dir,'scalp_distance.nii.gz'))
+    anat.save_nifti(head_edge,t1_aff,os.path.join(out_dir,'head_edge.nii.gz'))
+    anat.save_nifti(brain_edge,t1_aff,os.path.join(out_dir,'brain_edge.nii.gz'))
+    anat.save_nifti(brain_dist,t1_aff,os.path.join(out_dir,'scalp_distance.nii.gz'))
 
     # If coordinates are provided calculate distances at them
     if not coords is None:
@@ -96,30 +96,30 @@ def scalp_distance(subject,trans_file=None,coords=None):
         # space if no affine provided.
         # Get the input voxels in anatomical space.
         if trans_file:
-            anat_coords = convert_coords(coords,trans_file,in_file,t1_aff)
+            anat_coords = algo.convert_coords(coords,trans_file,in_file,t1_aff)
         else:
-            run_mni_alignment(in_file,out_dir)
+            anat.run_mni_alignment(in_file,out_dir)
             trans_file = os.path.join(out_dir,'mni_to_anat.mat')
-            anat_coords = convert_coords(coords,trans_file,in_file,t1_aff)
+            anat_coords = algo.convert_coords(coords,trans_file,in_file,t1_aff)
         # Identify the nearest voxels in the distance image
         # Get distance from sphere around these voxels
         radius = np.round(10/t1_dims.min(),0)
         if anat_coords.ndim == 1:
-            coords_dist = find_nearest(brain_dist,anat_coords)
-            dist_result,spheres = extract_distance(brain_dist,coords_dist,radius)
+            coords_dist = algo.find_nearest(brain_dist,anat_coords)
+            dist_result,spheres = algo.extract_distance(brain_dist,coords_dist,radius)
         else:
             coords_dist = [ [] for _ in range(anat_coords.shape[0])]
             dist_result = [ [] for _ in range(anat_coords.shape[0])]
             spheres = [ [] for _ in range(anat_coords.shape[0])]
             for i,coord in enumerate(anat_coords):
-                coords_dist[i] = find_nearest(brain_dist,coord)
-                dist_result[i],spheres[i] = extract_distance(brain_dist,coords_dist[i],radius)
+                coords_dist[i] = algo.find_nearest(brain_dist,coord)
+                dist_result[i],spheres[i] = algo.extract_distance(brain_dist,coords_dist[i],radius)
         # Generate output
         print('Plotting images')
         fname = os.path.join(out_dir,'skull_to_cortex_distance_results.pdf')
-        plot_results(t1_img,brain_edge,head_edge,fname,spheres=spheres,
+        plotting.plot_results(t1_img,brain_edge,head_edge,fname,spheres=spheres,
                         dist_result=dist_result,coords_dist=coords_dist)
     else:
         # Generate output
         print('Plotting images')
-        plot_results(t1_img,brain_edge,head_edge,fname)
+        plotting.plot_results(t1_img,brain_edge,head_edge,fname)
