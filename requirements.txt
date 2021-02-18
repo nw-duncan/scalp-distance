@@ -2,7 +2,6 @@ joblib
 matplotlib
 nibabel
 nipype
-numpy
-os
+numpy>=1.13.3
 scipy
 scikit-image
