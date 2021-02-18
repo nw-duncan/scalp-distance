@@ -3,7 +3,7 @@ import numpy as np
 import nipype.interfaces.fsl as fsl
 from skimage import measure,morphology,filters
 from joblib import Parallel, delayed
-from scipy import ndimage
+from scipy import ndimage,spatial
 
 def calc_threshold(X,Y):
     # Fit a Gaussian and minimise distance to histogram peak
@@ -108,7 +108,7 @@ def create_mask_edge(mask,img_dims):
     return(edge_mask)
 
 def calc_min_distance(coords,targets):
-    return(distance.cdist(np.array([coords]),targets,metric='euclidean').min())
+    return(spatial.distance.cdist(np.array([coords]),targets,metric='euclidean').min())
 
 def calc_distances(brain_edge,head_edge):
     brain_coords = np.transpose(np.nonzero(brain_edge))
