@@ -3,6 +3,7 @@ Function for creating PDF output with analysis result.
 """
 
 import numpy as np
+import matplotlib.pyplot as plt
 import matplotlib.backends.backend_pdf as pdf
 import matplotlib.gridspec as gridspec
 from scipy import ndimage
