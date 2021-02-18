@@ -6,6 +6,7 @@ anatomical images where necessary.
 
 """
 
+import os
 import nibabel as ni
 import numpy as np
 import nipype.interfaces.fsl as fsl
