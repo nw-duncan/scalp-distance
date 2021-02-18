@@ -9,6 +9,7 @@ anatomical images where necessary.
 import nibabel as ni
 import numpy as np
 import nipype.interfaces.fsl as fsl
+from scipy import ndimage
 
 def load_nifti(fname):
     img = ni.load(fname)

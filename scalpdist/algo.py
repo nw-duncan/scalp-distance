@@ -3,6 +3,7 @@ import numpy as np
 import nipype.interfaces.fsl as fsl
 from skimage import measure,morphology,filters
 from joblib import Parallel, delayed
+from scipy import ndimage
 
 def calc_threshold(X,Y):
     # Fit a Gaussian and minimise distance to histogram peak

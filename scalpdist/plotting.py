@@ -5,6 +5,7 @@ Function for creating PDF output with analysis result.
 import numpy as np
 import matplotlib.backends.backend_pdf as pdf
 import matplotlib.gridspec as gridspec
+from scipy import ndimage
 
 def plot_results(t1_img,brain_edge,head_edge,fname,spheres=None,dist_result=None,coords_dist=None):
     # Ensure masks are integers
