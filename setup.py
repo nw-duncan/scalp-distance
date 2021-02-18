@@ -10,7 +10,7 @@ with open(os.path.join('scalpdist', 'version.py')) as version_file:
     exec(version_file.read())
 
 # Load the long description from the README
-with open('README.rst') as readme_file:
+with open('README.md') as readme_file:
     long_description = readme_file.read()
 
 # Load the required dependencies from the requirements file
