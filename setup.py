@@ -33,7 +33,6 @@ setup(
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering',
-        'Operating System :: Microsoft :: Windows',
         'Operating System :: MacOS',
         'Operating System :: POSIX',
         'Operating System :: Unix',
