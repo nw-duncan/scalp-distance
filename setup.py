@@ -6,7 +6,7 @@ import os
 from setuptools import setup, find_packages
 
 # Get the current version number from inside the module
-with open(os.path.join('fooof', 'version.py')) as version_file:
+with open(os.path.join('scalpdist', 'version.py')) as version_file:
     exec(version_file.read())
 
 # Load the long description from the README
