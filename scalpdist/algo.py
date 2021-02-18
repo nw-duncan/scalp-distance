@@ -1,4 +1,5 @@
 
+import os
 import numpy as np
 import nipype.interfaces.fsl as fsl
 from skimage import measure,morphology,filters
