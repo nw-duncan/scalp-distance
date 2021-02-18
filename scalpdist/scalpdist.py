@@ -122,4 +122,5 @@ def scalp_distance(subject,trans_file=None,coords=None):
     else:
         # Generate output
         print('Plotting images')
+        fname = os.path.join(out_dir,'skull_to_cortex_distance_results.pdf')
         plotting.plot_results(t1_img,brain_edge,head_edge,fname)
