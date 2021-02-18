@@ -1,3 +1,10 @@
+# Installation
+The package can be installed via pip as follows:
+
+```
+python -m pip install https://github.com/nwd2918/scalp-distance/archive/main.tar.gz
+```
+
 # Dependencies
 
 ## Required python packages
