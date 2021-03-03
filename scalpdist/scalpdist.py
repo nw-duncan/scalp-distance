@@ -67,6 +67,7 @@ def scalp_distance(subject,trans_file=None,coords=None):
     # Extract brain tissue and detect edge
     brain_mask = algo.create_brain_mask(in_file,out_dir)
     if not isotropic:
+        # Resample the brain mask array if the original voxel size wasn't isotropic
         brain_mask = ndimage.affine_transform(brain_mask,matrix=resample_aff,
                         output_shape=t1_img.shape,order=0)
     brain_edge = algo.create_mask_edge(brain_mask,t1_dims)
