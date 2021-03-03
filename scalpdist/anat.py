@@ -39,6 +39,12 @@ def resample_img(t1_img,t1_dims):
 
 def run_mni_alignment(in_file,out_dir):
     print('Aligning anatomical with MNI template')
+    # Ensure in standard orientation
+    reorient = fsl.Reorient2Std()
+    reorient.inputs.in_file = in_file
+    reorient.inputs.out_file = in_file
+    reorient.run()
+    # Align to MNI template
     flirt = fsl.FLIRT()
     flirt.inputs.in_file = in_file
     flirt.inputs.reference = os.path.join(os.environ['FSLDIR'],'data','standard',
