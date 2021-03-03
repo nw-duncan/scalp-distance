@@ -65,7 +65,7 @@ def scalp_distance(subject,trans_file=None,coords=None):
     head_edge = algo.create_mask_edge(head_mask,t1_dims)
 
     # Extract brain tissue and detect edge
-    brain_mask = algo.create_brain_mask(t1_img,head_mask,t1_dims)
+    brain_mask = algo.create_brain_mask(in_file,out_dir)
     brain_edge = algo.create_mask_edge(brain_mask,t1_dims)
 
     # Calculate distance between brain and scalp - convert from voxels to mm

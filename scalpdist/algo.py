@@ -5,6 +5,7 @@ import nipype.interfaces.fsl as fsl
 from skimage import measure,morphology,filters
 from joblib import Parallel, delayed
 from scipy import ndimage,spatial
+from scalpdist import anat
 
 def calc_threshold(X,Y):
     # Fit a Gaussian and minimise distance to histogram peak
@@ -54,37 +55,16 @@ def create_head_mask(img):
         headMask[:,i,:] = fill_slice_holes(headMask[:,i,:])
     return(headMask.astype(float))
 
-def create_brain_mask(img,head_mask,img_dims):
+def create_brain_mask(in_file,out_dir):
     print(f'\nGenerating brain mask')
-    # Calculate image histogram within head
-    intensityMax = img[head_mask==1].max()
-    histogramY,histogramX = np.histogram(img[head_mask==1],bins=100,range=[0,intensityMax])
-    histogramX = histogramX[1:]
-    # Identify sections with lower 80% of AUC
-    auc_total = np.trapz(histogramY,histogramX)
-    for i in range(histogramX.shape[0]):
-        if np.trapz(histogramY[:i],histogramX[:i]) > auc_total*0.8:
-            lower_index = i-1
-            break
-    # Calculate upper and lower thresholds
-    thresh_l = calc_threshold(histogramX[:lower_index],histogramY[:lower_index])
-    thresh_u = calc_threshold(histogramX[lower_index:],histogramY[lower_index:])
-    # Do initial masking
-    brain_mask = img.copy()
-    brain_mask[brain_mask<thresh_l] = 0
-    brain_mask[brain_mask>thresh_u] = 0
-    brain_mask[brain_mask>0] = 1
-    # Erode image with 2mm spherical structuring element
-    sphere_2mm = morphology.ball(int(np.round(2/min(img_dims),0)))
-    tmp = ndimage.binary_erosion(brain_mask,structure=sphere_2mm)
-    # Detect largest contiguous component
-    labels = measure.label(tmp)
-    largestCC = labels == np.argmax(np.bincount(labels.flat)[1:])+1
-    # Dilate with 3mm spherical structuring element and close gaps
-    sphere_3mm = morphology.ball(int(np.round(3/min(img_dims),0)))
-    brain_mask = ndimage.binary_dilation(largestCC,structure=sphere_3mm)
-    brain_mask = ndimage.binary_closing(brain_mask,structure=sphere_3mm)
-    brain_mask = ndimage.binary_fill_holes(brain_mask)
+    # Run FSL BET brain extraction
+    bet = fsl.BET()
+    bet.inputs.in_file = in_file
+    bet.inputs.mask = True
+    bet.inputs.out_file = os.path.join(out_dir,'T1w_brain.nii.gz')
+    bet.inputs.mask_file = os.path.join(out_dir,'T1w_brain_mask.nii.gz')
+    # Load mask in as array
+    brain_mask = anat.load_nifti(os.path.join(out_dir,'T1w_brain_mask.nii.gz'))[0]
     return(brain_mask.astype(int))
 
 def get_slice_edge(img_slice):
