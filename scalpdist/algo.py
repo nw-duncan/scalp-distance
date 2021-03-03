@@ -63,6 +63,7 @@ def create_brain_mask(in_file,out_dir):
     bet.inputs.mask = True
     bet.inputs.out_file = os.path.join(out_dir,'T1w_brain.nii.gz')
     #bet.inputs.mask_file = os.path.join(out_dir,'T1w_brain_mask.nii.gz')
+    bet.run()
     # Load mask in as array
     brain_mask = anat.load_nifti(os.path.join(out_dir,'T1w_brain_mask.nii.gz'))[0]
     return(brain_mask.astype(int))
