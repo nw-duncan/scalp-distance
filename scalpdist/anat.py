@@ -21,6 +21,14 @@ def load_nifti(fname):
 def save_nifti(img,aff,fname):
     ni.Nifti1Image(img,aff).to_filename(fname)
 
+def reorient_img(in_file,out_dir):
+    out_file = os.path.join(out_dir,'T1w_reorient.nii.gz')
+    # Ensure in standard orientation
+    reorient = fsl.Reorient2Std()
+    reorient.inputs.in_file = in_file
+    reorient.inputs.out_file = out_file
+    reorient.run()
+
 def resample_img(t1_img,t1_dims):
     max_loc = np.argmax(t1_dims)
     scale = np.zeros((3,3))
@@ -39,11 +47,6 @@ def resample_img(t1_img,t1_dims):
 
 def run_mni_alignment(in_file,out_dir):
     print('Aligning anatomical with MNI template')
-    # Ensure in standard orientation
-    reorient = fsl.Reorient2Std()
-    reorient.inputs.in_file = in_file
-    reorient.inputs.out_file = in_file
-    reorient.run()
     # Align to MNI template
     flirt = fsl.FLIRT()
     flirt.inputs.in_file = in_file
@@ -58,3 +61,25 @@ def run_mni_alignment(in_file,out_dir):
     invt.inputs.invert_xfm = True
     invt.inputs.out_file = os.path.join(out_dir,'mni_to_anat.mat')
     invt.run()
+
+def calculate_trim_roi(head_mask,t1_dims):
+    # Find the top of the head
+    top = np.where(head_mask==1)[2].max()
+    # Calculate the point 150mm below this
+    bottom = top - (140/t1_dims[2])
+    return(bottom.astype(int))
+
+def trim_image(img,aff,bottom,out_dir):
+    out_file = os.path.join(out_dir,'T1w_trimmed.nii.gz')
+    out_mat = os.path.join(out_dir,'trim_to_orig.mat')
+    new_img = img[:,:,bottom:]
+    save_nifti(new_img,aff,out_file)
+    trim_aff = np.identity(4)
+    trim_aff[2,3] = -1*bottom
+    np.savetxt(out_mat,trim_aff)
+    return(trim_aff)
+    
+  
+
+    
+    

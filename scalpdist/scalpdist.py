@@ -63,18 +63,27 @@ def scalp_distance(subject,trans_file=None,coords=None):
     # Calculate head mask + edge
     head_mask = algo.create_head_mask(t1_img)
     head_edge = algo.create_mask_edge(head_mask,t1_dims)
+    
+    # Trim T1 image to remove neck
+    bottom = anat.calculate_trim_roi(head_mask,t1_dims)
+    trim_aff = anat.trim_image(t1_img,t1_aff,bottom,out_dir)
+    trim_file = os.path.join(out_dir,'T1w_trimmed.nii.gz')
 
     # Extract brain tissue and detect edge
-    brain_mask = algo.create_brain_mask(in_file,out_dir)
-    if not isotropic:
-        # Resample the brain mask array if the original voxel size wasn't isotropic
-        brain_mask = ndimage.affine_transform(brain_mask,matrix=resample_aff,
-                        output_shape=t1_img.shape,order=0)
+    brain_mask = algo.create_brain_mask(trim_file,out_dir)
+    # Return to original space from trimmed 
+    brain_mask = ndimage.affine_transform(brain_mask,matrix=trim_aff[:3,:3],
+            output_shape=t1_img.shape,order=0,offset=trim_aff[:3,-1])
+    # Resample the brain mask array if the original voxel size wasn't isotropic
+    # if not isotropic:
+    #     brain_mask = ndimage.affine_transform(brain_mask,matrix=resample_aff,
+    #                     output_shape=t1_img_orig.shape,order=0)
     brain_edge = algo.create_mask_edge(brain_mask,t1_dims)
 
     # Calculate distance between brain and scalp - convert from voxels to mm
     brain_dist = algo.calc_distances(brain_edge,head_edge)
-    brain_dist *= t1_dims[0]
+    brain_dist *= t1_dims.max()
+    
 
     # If necessary, return resampled image to original space
     if not isotropic:
@@ -87,7 +96,7 @@ def scalp_distance(subject,trans_file=None,coords=None):
         t1_img = t1_img_orig.copy()
         t1_dims = t1_dims_orig.copy()
         t1_img = t1_img_orig.copy()
-
+    
     # Save brain images
     print('\nGenerating NIFTI images')
     anat.save_nifti(head_edge,t1_aff,os.path.join(out_dir,'head_edge.nii.gz'))
