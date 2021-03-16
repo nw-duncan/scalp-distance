@@ -65,8 +65,8 @@ def run_mni_alignment(in_file,out_dir):
 def calculate_trim_roi(head_mask,t1_dims):
     # Find the top of the head
     top = np.where(head_mask==1)[2].max()
-    # Calculate the point 150mm below this
-    bottom = top - (140/t1_dims[2])
+    # Calculate the point 160mm below this
+    bottom = top - (160/t1_dims[2])
     return(bottom.astype(int))
 
 def trim_image(img,aff,bottom,out_dir):
@@ -78,8 +78,3 @@ def trim_image(img,aff,bottom,out_dir):
     trim_aff[2,3] = -1*bottom
     np.savetxt(out_mat,trim_aff)
     return(trim_aff)
-    
-  
-
-    
-    
