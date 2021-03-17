@@ -61,7 +61,6 @@ def create_brain_mask(in_file,out_dir):
     bet = fsl.BET()
     bet.inputs.in_file = in_file
     bet.inputs.mask = True
-    bet.inputs.robust = True
     bet.inputs.out_file = os.path.join(out_dir,'T1w_brain.nii.gz')
     #bet.inputs.mask_file = os.path.join(out_dir,'T1w_brain_mask.nii.gz')
     bet.run()
