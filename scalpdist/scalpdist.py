@@ -43,13 +43,17 @@ def scalp_distance(subject,trans_file=None,coords=None):
         if not os.path.isdir(os.path.join(root_dir,'derivatives','scalp_distance',subject)):
             os.mkdir(os.path.join(root_dir,'derivatives','scalp_distance',subject))
 
-    # Read in T1 image
+    # Check if T1 image exists
     in_file = os.path.join(root_dir,'rawdata',subject,'anat',subject+'_T1w.nii.gz')
     if not os.path.isfile(in_file):
         print('Anatomical image not found')
         print('Exiting')
-        #return
-    t1_img,t1_aff,t1_dims = anat.load_nifti(in_file)
+        return
+    # Reorient T1 image to standard and read in
+    t1_file = os.path.join(out_dir,'T1w_reorient.nii.gz')
+    if not os.path.isfile(t1_file):
+        anat.reorient_img(in_file,out_dir)
+    t1_img,t1_aff,t1_dims = anat.load_nifti(t1_file)
     isotropic = True
 
     # If images are anisotropic resample to largest dimension size
@@ -63,7 +67,7 @@ def scalp_distance(subject,trans_file=None,coords=None):
     # Calculate head mask + edge
     head_mask = algo.create_head_mask(t1_img)
     head_edge = algo.create_mask_edge(head_mask,t1_dims)
-    
+
     # Trim T1 image to remove neck
     bottom = anat.calculate_trim_roi(head_mask,t1_dims)
     trim_aff = anat.trim_image(t1_img,t1_aff,bottom,out_dir)
@@ -71,7 +75,7 @@ def scalp_distance(subject,trans_file=None,coords=None):
 
     # Extract brain tissue and detect edge
     brain_mask = algo.create_brain_mask(trim_file,out_dir)
-    # Return to original space from trimmed 
+    # Return to original space from trimmed
     brain_mask = ndimage.affine_transform(brain_mask,matrix=trim_aff[:3,:3],
             output_shape=t1_img.shape,order=0,offset=trim_aff[:3,-1])
     # Resample the brain mask array if the original voxel size wasn't isotropic
@@ -83,7 +87,7 @@ def scalp_distance(subject,trans_file=None,coords=None):
     # Calculate distance between brain and scalp - convert from voxels to mm
     brain_dist = algo.calc_distances(brain_edge,head_edge)
     brain_dist *= t1_dims.max()
-    
+
 
     # If necessary, return resampled image to original space
     if not isotropic:
@@ -96,7 +100,7 @@ def scalp_distance(subject,trans_file=None,coords=None):
         t1_img = t1_img_orig.copy()
         t1_dims = t1_dims_orig.copy()
         t1_img = t1_img_orig.copy()
-    
+
     # Save brain images
     print('\nGenerating NIFTI images')
     anat.save_nifti(head_edge,t1_aff,os.path.join(out_dir,'head_edge.nii.gz'))

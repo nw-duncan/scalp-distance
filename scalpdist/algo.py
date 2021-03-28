@@ -93,6 +93,7 @@ def calc_min_distance(coords,targets):
     return(spatial.distance.cdist(np.array([coords]),targets,metric='euclidean').min())
 
 def calc_distances(brain_edge,head_edge):
+    print('Calculating distance from brain to scalp')
     brain_coords = np.transpose(np.nonzero(brain_edge))
     head_coords = np.transpose(np.nonzero(head_edge))
     temp = Parallel(n_jobs=-2,verbose=0)(delayed(calc_min_distance)(brain_coords[i,:],
