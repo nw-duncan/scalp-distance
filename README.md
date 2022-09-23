@@ -2,7 +2,7 @@
 The package can be installed via pip as follows:
 
 ```
-python -m pip install https://github.com/nwd2918/scalp-distance/archive/main.tar.gz
+python -m pip install https://github.com/nw-duncan/scalp-distance/archive/main.tar.gz
 ```
 
 # Data organisation
